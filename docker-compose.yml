@@ -1,0 +1,80 @@
+version: '2'
+
+services:
+
+### PHP-FPM Container #######################################
+
+    php-fpm:
+        build:
+            context: ./php-fpm
+            dockerfile: Dockerfile-70
+        volumes_from:
+            - application
+        expose:
+            - "9000"
+        links:
+            - workspace
+        ports:
+            - "22:22"
+            - "9000:9000"
+        environment:
+            # PHPRC: "/usr/src/php/php.ini-development"
+            PHP_IDE_CONFIG: "serverName=docker"
+        tty: true  
+
+### Laravel Application Code Container ######################
+
+    application:
+        build: ./application
+        volumes:
+            - ../laravel:/var/www/laravel
+            - ../cpo:/var/www/cpo
+            - ../home:/var/www/home
+
+### Databases Data Container ################################
+
+    data:
+        build: ./data
+        volumes:
+            - /var/lib/mariadb:/var/lib/mariadb
+
+### Nginx Server Container ##################################
+
+    nginx:
+        build: ./nginx
+        volumes_from:
+            - application
+        volumes:
+            - ./logs/nginx/:/var/log/nginx
+        ports:
+            - "80:80"
+            - "443:443"
+        links:
+            - php-fpm
+
+### MariaDB Container #######################################
+
+    mariadb:
+        build: ./mariadb
+        volumes_from:
+            - data
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_DATABASE: homestead
+            MYSQL_USER: homestead
+            MYSQL_PASSWORD: secret
+            MYSQL_ROOT_PASSWORD: root
+
+
+### Workspace Utilities Container ###########################
+
+    workspace:
+        build:
+            context: ./workspace
+            args:
+                # INSTALL_PRESTISSIMO: ${INSTALL_PRESTISSIMO}
+                INSTALL_PRESTISSIMO: 1
+        volumes_from:
+            - application
+        tty: true
