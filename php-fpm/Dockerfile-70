@@ -31,7 +31,9 @@ RUN docker-php-ext-install \
     pdo_mysql \
     gd
 
-
+RUN cd /usr/share \
+    && git clone https://github.com/pear/pear-core.git pear
+    
 # Install xdebug
 RUN pecl install xdebug \
     && docker-php-ext-enable xdebug
@@ -57,8 +59,8 @@ RUN rm -f /etc/service/sshd/down
 
 ## Created keys for vm use
 RUN mkdir -p /root/.ssh
-ADD /C/Users/larry/.ssh/id_rsa_vm /root/.ssh
-ADD /C/Users/larry/.ssh/id_rsa_vm.pub /root/.ssh
+ADD ./id_rsa_vm /root/.ssh
+ADD ./id_rsa_vm.pub /root/.ssh
 RUN ls /root/.ssh
 RUN touch /root/.ssh/authorized_keys
 RUN cat /root/.ssh/id_rsa_vm.pub >> /root/.ssh/authorized_keys
