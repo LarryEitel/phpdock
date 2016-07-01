@@ -6,9 +6,9 @@
 - Install `Laravel`
 - Clone this repo into sibling directory
 - Create ssh keys
-  - `/C/Users/larry/.ssh/id_rsa_vm`
-  - `/C/Users/larry/.ssh/id_rsa_vm.pub`
-  - `/C/Users/larry/.ssh/id_rsa_vm.ppk` (puttygen'd)
+  - `php-fpm/id_rsa_vm`
+  - `php-fpm/id_rsa_vm.pub`
+  - `/C/Users/larry/.ssh/id_rsa_vm.ppk` (puttygen'd) Used in PHPStorm for keyless connection
 - `cd phpdock`
 - docker-compose -d up nginx mariadb
 - Visit: `http://laravel/`

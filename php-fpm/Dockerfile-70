@@ -8,9 +8,12 @@ ADD ./laravel.pool.conf /usr/local/etc/php-fpm.d/
 
 RUN apt-get update && apt-get install -y \
     libpq-dev \
-    php-pear \
+    curl \
     libpng12-dev \
     libfreetype6-dev \
+    libssl-dev \
+    libmcrypt-dev \
+    php-pear \
     ssh \
     telnet \
     git \
@@ -20,6 +23,10 @@ RUN apt-get update && apt-get install -y \
     nano \
     --no-install-recommends \
     && rm -r /var/lib/apt/lists/*
+
+
+# install mcrypt library
+RUN docker-php-ext-install mcrypt
 
 # configure gd library
 RUN docker-php-ext-configure gd \
@@ -31,15 +38,20 @@ RUN docker-php-ext-install \
     pdo_mysql \
     gd
 
+# Install Memcached for php 7
+# RUN curl -L -o /tmp/memcached.tar.gz "https://github.com/php-memcached-dev/php-memcached/archive/php7.tar.gz" \
+#     && mkdir -p /usr/src/php/ext/memcached \
+#     && tar -C /usr/src/php/ext/memcached -zxvf /tmp/memcached.tar.gz --strip 1 \
+#     && docker-php-ext-configure memcached \
+#     && docker-php-ext-install memcached \
+#     && rm /tmp/memcached.tar.gz
+
 RUN cd /usr/share \
     && git clone https://github.com/pear/pear-core.git pear
     
 # Install xdebug
 RUN pecl install xdebug \
     && docker-php-ext-enable xdebug
-
-# remove load xdebug extension (only load on phpunit command)
-# RUN sed -i 's/^/;/g' /etc/php/7.0/cli/conf.d/20-xdebug.ini
 
 # Add bin folder of composer to PATH.
 # RUN echo "export PATH=${PATH}:/var/www/laravel/vendor/bin" >> ~/.bashrc
@@ -59,8 +71,11 @@ RUN rm -f /etc/service/sshd/down
 
 ## Created keys for vm use
 RUN mkdir -p /root/.ssh
+
+# These are excluded in .gitignore
 ADD ./id_rsa_vm /root/.ssh
 ADD ./id_rsa_vm.pub /root/.ssh
+
 RUN ls /root/.ssh
 RUN touch /root/.ssh/authorized_keys
 RUN cat /root/.ssh/id_rsa_vm.pub >> /root/.ssh/authorized_keys
@@ -68,7 +83,6 @@ RUN cat /root/.ssh/id_rsa_vm.pub >> /root/.ssh/authorized_keys
 RUN usermod -u 1000 www-data
 
 WORKDIR /var/www/laravel
-
 
 CMD ["php-fpm"]
 
