@@ -1,0 +1,1 @@
+docker exec pd_workspace_1 /bin/bash cd /var/www/laravel; composer update
